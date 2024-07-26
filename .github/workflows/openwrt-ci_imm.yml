@@ -122,15 +122,6 @@ jobs:
           # CONFIG_TARGET_ROOTFS_PARTSIZE=1024
           EOF
 
-          # cat >> .config <<EOF
-          # CONFIG_PACKAGE_kmod-kvm-intel=y
-          # CONFIG_PACKAGE_kmod-kvm-amd=y
-          # CONFIG_PACKAGE_kmod-tun=y
-          # CONFIG_PACKAGE_qemu-x86_64-softmmu=y
-          # CONFIG_PACKAGE_qemu-bridge-helper=y
-          # CONFIG_PACKAGE_qemu-img=y
-          # EOF
-
           cat >> .config <<EOF
           CONFIG_PACKAGE_kmod-tcp-bbr=y
           CONFIG_PACKAGE_kmod-fs-ext4=y
