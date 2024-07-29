@@ -15,11 +15,6 @@ on:
       - master
   # schedule:
   #   - cron: 0 20 * * *
-  release:
-    types: [published]
-  merge_group:
-    branches:
-      - master
 
 jobs:
 
