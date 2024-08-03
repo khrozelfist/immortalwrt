@@ -1,12 +1,3 @@
-#
-# This is free software, lisence use MIT.
-#
-# Copyright (C) 2019 P3TERX <https://p3terx.com>
-# Copyright (C) 2020 KFERMercer <KFER.Mercer@gmail.com>
-#
-# <https://github.com/KFERMercer/OpenWrt-CI>
-#
-
 name: OpenWrt-CI
 
 on:
@@ -23,8 +14,6 @@ jobs:
     name: Build OpenWrt firmware
 
     runs-on: ubuntu-latest
-
-    if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
 
@@ -105,16 +94,8 @@ jobs:
           echo CONFIG_KERNEL_BUILD_USER="OpenWrt-CI" >> ./.config
 
           cat >> .config <<EOF
-          # CONFIG_VHDX_IMAGES=y
-          # CONFIG_GRUB_EFI_IMAGES=y
-          # CONFIG_TARGET_IMAGES_GZIP=n
-          # CONFIG_TARGET_ROOTFS_EXT4FS=y
           CONFIG_TARGET_ROOTFS_TARGZ=n
           CONFIG_TARGET_ROOTFS_SQUASHFS=n
-          # CONFIG_TARGET_ROOTFS_PARTSIZE=1024
-          # CONFIG_TARGET_KERNEL_PARTSIZE=16
-          # CONFIG_TARGET_EXT4_BLOCKSIZE_4K=y
-          # CONFIG_TARGET_EXT4_BLOCKSIZE=4096
           EOF
 
           cat >> .config <<EOF
@@ -132,11 +113,6 @@ jobs:
           CONFIG_PACKAGE_luci-app-dockerman=y
           EOF
 
-          #
-          # ===============================================================
-          #
-
-          sed -i 's/^[ \t]*//g' ./.config
           make defconfig
 
       - name: Make download
@@ -192,7 +168,6 @@ jobs:
         if: github.event == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_token: ${{ secrets.YOURTOKEN }}
           file: ./artifact/firmware/*
           tag: ${{ github.ref }}
           file_glob: true
