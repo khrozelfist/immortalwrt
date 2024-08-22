@@ -35,9 +35,8 @@ jobs:
 
       - name: Add Patch
         run: |
-          # for patches in $(ls ./target/linux/x86/ | grep patches-);do
-          #  wget -O ./target/linux/x86/$patches/600-bnx2x-warpcore-8727-2g5.patch https://raw.githubusercontent.com/JAMESMTL/snippets/master/bnx2x/patches/bnx2x_warpcore_8727_2_5g_sgmii_txfault.patch
-          # done
+          # wget -O $(ls -d ./target/linux/x86/patches-*)/600-bnx2x-warpcore-8727-2g5.patch https://raw.githubusercontent.com/JAMESMTL/snippets/master/bnx2x/patches/bnx2x_warpcore_8727_2_5g_sgmii_txfault.patch
+          # wget -O ./package/network/utils/iptables/patches/600-fix-among-match.patch https://git.netfilter.org/iptables/patch/?id=eddbb27651b93ac6f329bf8113223e7360ea7613
 
       - name: Git Clone
         run: |
@@ -76,6 +75,12 @@ jobs:
       - name: Other
         run: |
           sed -i '/DEFAULT:=n/d' feeds/packages/net/rp-pppoe/Makefile
+          
+          mkdir -p /openwrt/firmware/i915
+          curl -L https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/i915/glk_dmc_ver1_04.bin -o /openwrt/firmware/i915/glk_dmc_ver1_04.bin
+          echo 'CONFIG_FIRMWARE_IN_KERNEL=y' >> target/linux/x86/64/config-5.15
+          echo 'CONFIG_EXTRA_FIRMWARE="i915/glk_dmc_ver1_04.bin"' >> target/linux/x86/64/config-5.15
+          echo 'CONFIG_EXTRA_FIRMWARE_DIR="/openwrt/firmware"' >> target/linux/x86/64/config-5.15
 
       - name: Generate configuration file
         run: |
