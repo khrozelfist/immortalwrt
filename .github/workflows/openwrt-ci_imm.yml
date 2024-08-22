@@ -44,6 +44,14 @@ jobs:
           # git clone https://github.com/khrozelfist/3proxy-openwrt package/net/3proxy
           # git clone https://github.com/v2rayA/v2raya-openwrt package/net/v2raya
 
+      - name: Other Pre
+        run: |          
+          mkdir -p ./firmware/i915
+          curl -L https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/i915/icl_dmc_ver1_09.bin -o ./firmware/i915/icl_dmc_ver1_09.bin
+          echo 'CONFIG_FIRMWARE_IN_KERNEL=y' >> ./target/linux/x86/64/config-5.15
+          echo 'CONFIG_EXTRA_FIRMWARE="i915/glk_dmc_ver1_04.bin"' >> ./target/linux/x86/64/config-5.15
+          echo 'CONFIG_EXTRA_FIRMWARE_DIR="./firmware"' >> ./target/linux/x86/64/config-5.15
+
       - name: Space cleanup
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -72,15 +80,9 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
-      - name: Other
+      - name: Other Post
         run: |
           sed -i '/DEFAULT:=n/d' feeds/packages/net/rp-pppoe/Makefile
-          
-          mkdir -p ./firmware/i915
-          curl -L https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/i915/icl_dmc_ver1_09.bin -o ./firmware/i915/icl_dmc_ver1_09.bin
-          echo 'CONFIG_FIRMWARE_IN_KERNEL=y' >> ./target/linux/x86/64/config-5.15
-          echo 'CONFIG_EXTRA_FIRMWARE="i915/glk_dmc_ver1_04.bin"' >> ./target/linux/x86/64/config-5.15
-          echo 'CONFIG_EXTRA_FIRMWARE_DIR="./firmware"' >> ./target/linux/x86/64/config-5.15
 
       - name: Generate configuration file
         run: |
