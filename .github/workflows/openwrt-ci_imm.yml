@@ -1,9 +1,10 @@
 name: OpenWrt-CI
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
+  # push:
+  # branches:
+  #   - master
   # schedule:
   #   - cron: 0 20 * * *
 
@@ -172,7 +173,6 @@ jobs:
           path: ./artifact/firmware/
 
       - name: Upload release asset
-        if: github.event == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
           file: ./artifact/firmware/*
