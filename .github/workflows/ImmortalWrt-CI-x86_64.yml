@@ -41,7 +41,7 @@ jobs:
 
       - name: Git Clone
         run: |
-          git clone https://github.com/rufengsuixing/luci-app-adguardhome package/luci/luci-app-adguardhome
+          # git clone https://github.com/rufengsuixing/luci-app-adguardhome package/luci/luci-app-adguardhome
           # git clone https://github.com/khrozelfist/3proxy-openwrt package/net/3proxy
           # git clone https://github.com/v2rayA/v2raya-openwrt package/net/v2raya
 
@@ -112,13 +112,50 @@ jobs:
           CONFIG_PACKAGE_kmod-nft-tproxy=y
           CONFIG_PACKAGE_kmod-nft-netdev=y
           CONFIG_PACKAGE_wpad-mbedtls=y
-          CONFIG_PACKAGE_luci-app-adguardhome=y
-          CONFIG_PACKAGE_luci-app-upnp=y
-          CONFIG_PACKAGE_luci-app-vlmcsd=y
+          CONFIG_PACKAGE_luci-app-wol=y
+          CONFIG_PACKAGE_luci-app-ddns=y
+          CONFIG_PACKAGE_luci-app-samba4=y
           CONFIG_PACKAGE_luci-app-smartdns=y
-          CONFIG_PACKAGE_luci-app-softethervpn=y
-          CONFIG_PACKAGE_luci-app-zerotier=y
-          CONFIG_PACKAGE_luci-app-dockerman=y
+          CONFIG_PACKAGE_luci-app-vnstat2=y
+          CONFIG_PACKAGE_luci-app-statistics=y
+          CONFIG_PACKAGE_luci-app-natmap=y
+          CONFIG_PACKAGE_luci-app-upnp=y
+          CONFIG_PACKAGE_luci-app-dawn=y
+          CONFIG_PACKAGE_luci-app-nlbwmon=y
+          CONFIG_PACKAGE_luci-proto-wireguard=y
+          CONFIG_PACKAGE_dnsmasq=n
+          CONFIG_PACKAGE_dnsmasq-full=y
+          CONFIG_PACKAGE_ethtool-full=y
+          CONFIG_PACKAGE_ip-full=y
+          CONFIG_PACKAGE_nano=y
+          CONFIG_PACKAGE_curl=y
+          CONFIG_PACKAGE_openssh-sftp-server=y
+          CONFIG_PACKAGE_irqbalance=y
+          CONFIG_PACKAGE_iperf3=y
+          CONFIG_PACKAGE_fdisk=y
+          CONFIG_PACKAGE_parted=y
+          CONFIG_PACKAGE_lsblk=y
+          CONFIG_PACKAGE_blkid=y
+          CONFIG_PACKAGE_block-mount=y
+          CONFIG_PACKAGE_conntrack=y
+          CONFIG_PACKAGE_bind-dig=y
+          CONFIG_PACKAGE_drill=y
+          CONFIG_PACKAGE_bash=y
+          CONFIG_PACKAGE_pciutils=y
+          CONFIG_PACKAGE_proxychains-ng=y
+          CONFIG_PACKAGE_htop=y
+          CONFIG_PACKAGE_xxd=y
+          CONFIG_PACKAGE_cifsmount=y
+          CONFIG_PACKAGE_screen=y
+          CONFIG_PACKAGE_collectd-mod-thermal=y
+          CONFIG_PACKAGE_collectd-mod-exec=y
+          CONFIG_PACKAGE_collectd-mod-conntrack=y
+          CONFIG_PACKAGE_collectd-mod-ipstatistics=y
+          CONFIG_PACKAGE_collectd-mod-processes=y
+          CONFIG_PACKAGE_collectd-mod-tcpconns=y
+          CONFIG_PACKAGE_collectd-mod-uptime=y
+          CONFIG_PACKAGE_collectd-mod-ping=y
+          CONFIG_PACKAGE_collectd-mod-dns=y
           EOF
 
           make defconfig
