@@ -1,4 +1,4 @@
-name: ImmortalWrt-CI-_test
+name: ImmortalWrt-CI-test
 
 on:
   workflow_dispatch:
