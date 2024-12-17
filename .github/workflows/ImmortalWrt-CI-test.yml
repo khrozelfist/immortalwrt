@@ -1,0 +1,192 @@
+name: ImmortalWrt-CI-_test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_openwrt:
+    name: Build OpenWrt firmware
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: master
+
+    - name: Get tags
+      run : |
+        git fetch --tags https://github.com/immortalwrt/immortalwrt.git
+        git push --tags
+        echo "tag=$(git tag | sort | tail -1)" >> $GITHUB_ENV
+
+    - name: Checkout to tag
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ env.tag }}
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        set +e
+        docker rmi `docker images -q`
+        echo "Deleting files, please wait ..."
+        sudo rm -rf \
+          /usr/share/dotnet \
+          /usr/local/lib/android \
+          /opt/ghc \
+          /etc/mysql \
+          /etc/php
+        sudo -E apt-get -y purge azure-cli* docker* ghc* zulu* hhvm* llvm* firefox* google* dotnet* aspnetcore* powershell* openjdk* adoptopenjdk* mysql* php* mongodb* moby* snap* || true
+        sudo -E apt-get update
+        sudo -E apt-get -y install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev qemu-img
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get clean
+
+    - name: Other Pre
+      run: |          
+        # mkdir -p ./firmware/i915
+        # curl -L https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/i915/icl_dmc_ver1_09.bin -o ./firmware/i915/icl_dmc_ver1_09.bin
+        # echo 'CONFIG_FIRMWARE_IN_KERNEL=y' >> ./target/linux/x86/64/config-5.15
+        # echo 'CONFIG_EXTRA_FIRMWARE="i915/glk_dmc_ver1_04.bin"' >> ./target/linux/x86/64/config-5.15
+        # echo 'CONFIG_EXTRA_FIRMWARE_DIR="./firmware"' >> ./target/linux/x86/64/config-5.15
+
+    - name: Add Patch
+      run: |
+        # wget -O $(ls -d ./target/linux/x86/patches-*)/600-bnx2x-warpcore-8727-2g5.patch https://raw.githubusercontent.com/JAMESMTL/snippets/master/bnx2x/patches/bnx2x_warpcore_8727_2_5g_sgmii_txfault.patch
+        # wget -O ./package/network/utils/iptables/patches/600-fix-among-match.patch https://git.netfilter.org/iptables/patch/?id=eddbb27651b93ac6f329bf8113223e7360ea7613
+
+    - name: Git Clone
+      run: |
+        # git clone https://github.com/rufengsuixing/luci-app-adguardhome package/luci/luci-app-adguardhome
+        # git clone https://github.com/khrozelfist/3proxy-openwrt package/net/3proxy
+        # git clone https://github.com/v2rayA/v2raya-openwrt package/net/v2raya
+
+    - name: Update & Install feeds
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        ./scripts/feeds install -a
+
+    - name: Other Post
+      run: |
+        sed -i '/DEFAULT:=n/d' feeds/packages/net/rp-pppoe/Makefile
+
+    - name: Generate configuration file
+      run: |
+        ver=$(echo ${{ env.tag }} | cut -c 2-)
+
+        rm -f ./.config*
+        curl https://downloads.immortalwrt.org/releases/$ver/targets/x86/64/config.buildinfo | grep -e _TARGET_ -e _PACKAGE_ -e _VERSION_ >> ./.config
+
+        sed -i 's/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/' ./.config
+        sed -i 's/CONFIG_TARGET_PER_DEVICE_ROOTFS=y/CONFIG_TARGET_PER_DEVICE_ROOTFS=n/' ./.config
+        sed -i 's/CONFIG_TARGET_ALL_PROFILES=y/CONFIG_TARGET_ALL_PROFILES=n/' ./.config
+
+        echo CONFIG_KERNEL_BUILD_DOMAIN="Azure" >> ./.config
+        echo CONFIG_KERNEL_BUILD_USER="OpenWrt-CI" >> ./.config
+
+        cat >> .config <<EOF
+        CONFIG_TARGET_ROOTFS_TARGZ=n
+        CONFIG_TARGET_ROOTFS_SQUASHFS=n
+        EOF
+
+        cat >> .config <<EOF
+        CONFIG_PACKAGE_kmod-tcp-bbr=y
+        CONFIG_PACKAGE_kmod-fs-ext4=y
+        CONFIG_PACKAGE_kmod-nft-tproxy=y
+        CONFIG_PACKAGE_kmod-nft-netdev=y
+        CONFIG_PACKAGE_wpad-mbedtls=y
+        CONFIG_PACKAGE_luci-app-wol=y
+        CONFIG_PACKAGE_luci-app-ddns=y
+        CONFIG_PACKAGE_luci-app-samba4=y
+        CONFIG_PACKAGE_luci-app-smartdns=y
+        CONFIG_PACKAGE_luci-app-vnstat2=y
+        CONFIG_PACKAGE_luci-app-statistics=y
+        CONFIG_PACKAGE_luci-app-natmap=y
+        CONFIG_PACKAGE_luci-app-upnp=y
+        CONFIG_PACKAGE_luci-app-dawn=y
+        CONFIG_PACKAGE_luci-app-nlbwmon=y
+        CONFIG_PACKAGE_luci-proto-wireguard=y
+        CONFIG_PACKAGE_dnsmasq=n
+        CONFIG_PACKAGE_dnsmasq-full=y
+        CONFIG_PACKAGE_ethtool-full=y
+        CONFIG_PACKAGE_ip-full=y
+        CONFIG_PACKAGE_nano=y
+        CONFIG_PACKAGE_curl=y
+        CONFIG_PACKAGE_openssh-sftp-server=y
+        CONFIG_PACKAGE_irqbalance=y
+        CONFIG_PACKAGE_iperf3=y
+        CONFIG_PACKAGE_fdisk=y
+        CONFIG_PACKAGE_parted=y
+        CONFIG_PACKAGE_lsblk=y
+        CONFIG_PACKAGE_blkid=y
+        CONFIG_PACKAGE_block-mount=y
+        CONFIG_PACKAGE_conntrack=y
+        CONFIG_PACKAGE_bind-dig=y
+        CONFIG_PACKAGE_drill=y
+        CONFIG_PACKAGE_bash=y
+        CONFIG_PACKAGE_pciutils=y
+        CONFIG_PACKAGE_proxychains-ng=y
+        CONFIG_PACKAGE_htop=y
+        CONFIG_PACKAGE_xxd=y
+        CONFIG_PACKAGE_cifsmount=y
+        CONFIG_PACKAGE_screen=y
+        CONFIG_PACKAGE_collectd-mod-thermal=y
+        CONFIG_PACKAGE_collectd-mod-exec=y
+        CONFIG_PACKAGE_collectd-mod-conntrack=y
+        CONFIG_PACKAGE_collectd-mod-ipstatistics=y
+        CONFIG_PACKAGE_collectd-mod-processes=y
+        CONFIG_PACKAGE_collectd-mod-tcpconns=y
+        CONFIG_PACKAGE_collectd-mod-uptime=y
+        CONFIG_PACKAGE_collectd-mod-ping=y
+        CONFIG_PACKAGE_collectd-mod-dns=y
+        EOF
+
+        make defconfig
+
+    - name: Download package
+      working-directory: ./openwrt
+      run: |
+        make download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+
+    - name: Build firmware
+      working-directory: ./openwrt
+      run: |
+        echo -e "$(nproc) thread build."
+        make -j$(nproc) V=s
+
+    - name: Prepare artifact
+      run : |
+        mkdir -p ./artifact/firmware
+        mkdir -p ./artifact/package
+        mkdir -p ./artifact/buildinfo
+        rm -rf $(find ./bin/targets/ -type d -name "packages")
+        cp -rf $(find ./bin/targets/ -type f) ./artifact/firmware/
+        cp -rf $(find ./bin/packages/ -type f -name "*.ipk") ./artifact/package/
+        cp -rf $(find ./bin/targets/ -type f -name "*.buildinfo" -o -name "*.manifest") ./artifact/buildinfo/
+
+        # rm -rf $(find ./artifact/firmware/ -type f -name "*.tar.gz")
+        rm -rf $(find ./artifact/firmware/ -type f -name "*.bin")
+        rm -rf $(find ./artifact/firmware/ -type f -name "*.img*" | grep -v "combined-efi")
+
+    - name: Deliver buildinfo
+      uses: actions/upload-artifact@v4
+      with:
+        name: buildinfo_${{ env.tag }}_${{ env.sha }}
+        path: ./artifact/buildinfo/
+
+    - name: Deliver package
+      uses: actions/upload-artifact@v4
+      with:
+        name: package_${{ env.tag }}_${{ env.sha }}
+        path: ./artifact/package/
+
+    - name: Deliver firmware
+      uses: actions/upload-artifact@v4
+      with:
+        name: firmware_${{ env.tag }}_${{ env.sha }}
+        path: ./artifact/firmware/
