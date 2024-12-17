@@ -347,8 +347,7 @@ jobs:
       working-directory: ./openwrt
       run: |
         make download -j$(nproc)
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
+        rm -rf $(find ./dl/ -size -1024c)
 
     - name: Build firmware
       working-directory: ./openwrt
