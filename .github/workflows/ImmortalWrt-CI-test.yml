@@ -94,6 +94,7 @@ jobs:
         cat >> .config <<EOF
         CONFIG_TARGET_ROOTFS_TARGZ=n
         CONFIG_TARGET_ROOTFS_SQUASHFS=n
+        CONFIG_TARGET_ROOTFS_PARTSIZE=512
         EOF
 
         cat >> .config <<EOF
