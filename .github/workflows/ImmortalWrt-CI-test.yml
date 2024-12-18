@@ -21,7 +21,7 @@ jobs:
         echo "tag=$(git tag | sort | tail -1)" >> $GITHUB_ENV
         echo "sha=$(date | sha1sum | cut -c -8)" >> $GITHUB_ENV
 
-    - name: Checkout to tag
+    - name: Checkout lately
       uses: actions/checkout@v4
       with:
         ref: ${{ env.tag }}
