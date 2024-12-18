@@ -259,12 +259,10 @@ jobs:
         mkdir -p ./artifact/buildinfo
         rm -rf $(find ./bin/targets/ -type d -name "packages")
         cp -rf $(find ./bin/targets/ -type f) ./artifact/firmware/
-        cp -rf $(find ./bin/packages/ -type f -name "*.ipk") ./artifact/package/
-        cp -rf $(find ./bin/targets/ -type f -name "*.buildinfo" -o -name "*.manifest") ./artifact/buildinfo/
-
-        # rm -rf $(find ./artifact/firmware/ -type f -name "*.tar.gz")
         rm -rf $(find ./artifact/firmware/ -type f -name "*.bin")
         rm -rf $(find ./artifact/firmware/ -type f -name "*.img*" | grep -v "combined-efi")
+        cp -rf $(find ./bin/packages/ -type f -name "*.ipk") ./artifact/package/
+        cp -rf $(find ./bin/targets/ -type f -name "*.buildinfo" -o -name "*.manifest") ./artifact/buildinfo/
 
     - name: Deliver buildinfo
       uses: actions/upload-artifact@v4
